@@ -5,6 +5,9 @@
 
 現状はセット1の **60 問**（完成）。
 
+**マニュアル（起動と使い方）:** [docs/manual.md](docs/manual.md)  
+**機能設計:** [docs/functional_design.md](docs/functional_design.md) · **内部設計:** [docs/internal_design.md](docs/internal_design.md)
+
 ## 起動
 
 ```bash
