@@ -1,0 +1,7 @@
+venv/
+data/*.sqlite
+data/secret_key
+__pycache__/
+*.pyc
+.DS_Store
+.Python

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}結果 {{ result.percent }}%{% endblock %}
+{% block body %}
+<section class="card">
+  <p class="kicker">{% if passed %}合格目安を超えました{% else %}合格目安 {{ quiz_set.pass_percent }}% に届いていません{% endif %}</p>
+  <h1>{{ result.correct }} / {{ result.total }}（{{ result.percent }}%）</h1>
+  <div class="domains">
+    {% for domain, bucket in result.by_domain.items() %}
+    {% set pct = (100 * bucket.correct / bucket.total)|round|int if bucket.total else 0 %}
+    <div class="domain-row">
+      <span>{{ domain_labels[domain] }}</span>
+      <div class="bar"><i style="width: {{ pct }}%"></i></div>
+      <span>{{ bucket.correct }}/{{ bucket.total }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <p>
+    <a class="btn primary" href="{{ url_for('review', attempt_id=attempt.id, qid=quiz_set.questions[0].id) }}">解説を見る</a>
+    <a class="btn" href="{{ url_for('home') }}">ホーム</a>
+  </p>
+</section>
+{% endblock %}

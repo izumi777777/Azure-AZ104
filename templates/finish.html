@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}提出の確認{% endblock %}
+{% block body %}
+<section class="card">
+  <h1>提出しますか</h1>
+  <p>回答済み {{ attempt.answers|length }} / {{ quiz_set.questions|length }} 問。</p>
+  {% if missing %}
+  <p class="warn-text">指定個数まで選んでいない問: {{ missing|join(", ") }}</p>
+  {% else %}
+  <p>未完成の問はありません。</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('exam_finish') }}" class="nav">
+    <a class="btn" href="{{ url_for('exam_question', qid=quiz_set.questions[0].id) }}">戻る</a>
+    <button class="btn primary" type="submit">採点する</button>
+  </form>
+</section>
+{% endblock %}

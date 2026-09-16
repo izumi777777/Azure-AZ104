@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}正誤ログ{% endblock %}
+{% block body %}
+<section class="card">
+  <p class="kicker">正解・不正解</p>
+  <h1>正誤ログ</h1>
+  <p class="lede">練習の答え合わせと、試験の提出結果を問題ごとに集計します。弱い順です。</p>
+  {% if domain_stats %}
+  <div class="domains">
+    {% for domain, bucket in domain_stats.items() %}
+    <div class="domain-row">
+      <span>{{ domain_labels[domain] }}</span>
+      <div class="bar"><i style="width: {{ bucket.percent }}%"></i></div>
+      <span>{{ bucket.correct }}/{{ bucket.n }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+{% if recent_wrongs %}
+<section class="card">
+  <p class="kicker">最近の不正解</p>
+  <ul class="plain">
+    {% for row in recent_wrongs %}
+    {% set q = questions.get(row.qid) %}
+    <li>
+      {% if q %}問 {{ q.no }}{% else %}{{ row.qid }}{% endif %}
+      · {{ domain_labels[row.domain] }}
+      · 選択 {{ row.selected|join(', ') or '未選択' }}
+      · <a href="{{ url_for('coach', qid=row.qid) }}">壁打ち</a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="card">
+  <p class="kicker">問題別</p>
+  {% if stats %}
+  <table class="grid">
+    <thead>
+      <tr><th>問</th><th>領域</th><th>正答</th><th>回数</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for row in stats %}
+      <tr>
+        <td>問 {{ row.no or '-' }}</td>
+        <td>{{ domain_labels[row.domain] }}</td>
+        <td class="{% if row.percent < 70 %}bad{% endif %}">{{ row.percent }}%（{{ row.correct }}/{{ row.n }}）</td>
+        <td>{{ row.n }}</td>
+        <td>
+          <a href="{{ url_for('coach', qid=row.qid) }}">壁打ち</a>
+          · <a href="{{ url_for('memos') }}?qid={{ row.qid }}">メモ</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>まだ記録がありません。</p>
+  {% endif %}
+</section>
+
+{% if attempts %}
+<section class="card">
+  <p class="kicker">受験履歴</p>
+  <ul class="plain">
+    {% for item in attempts %}
+    <li>
+      <a href="{{ url_for('result', attempt_id=item.id) }}">
+        {{ item.finished_at[:16].replace('T', ' ') }} · {{ item.mode }} ·
+        {{ item.result.correct }}/{{ item.result.total }}（{{ item.result.percent }}%）
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

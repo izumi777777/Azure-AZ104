@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}問 {{ question.no }} / {{ quiz_set.questions|length }}{% endblock %}
+{% block body %}
+<form id="exam-form" method="post" action="{{ url_for('exam_save', qid=question.id) }}">
+  <div class="exam-grid">
+    <section class="card question">
+      <div class="meta">
+        <span>問 {{ question.no }} / {{ quiz_set.questions|length }}</span>
+        <span class="pill">{{ domain_labels[question.domain] }}</span>
+        <span class="pill warn">{{ select_labels[question.select_count] }}</span>
+        {% if attempt.mode == "practice" %}<span class="pill">練習</span>{% endif %}
+      </div>
+      {% if question.preamble %}
+      <p class="preamble">{{ question.preamble }}</p>
+      {% endif %}
+      <h2 class="stem">{{ question.stem }}</h2>
+      {% if question.code %}
+      <pre class="code"><code>{{ question.code }}</code></pre>
+      {% endif %}
+
+      <fieldset class="choices" data-select-count="{{ question.select_count }}">
+        {% for choice in question.choices %}
+        <label class="choice {% if choice.key in selected %}picked{% endif %}">
+          {% if question.select_count == 1 %}
+          <input type="radio" name="choice" value="{{ choice.key }}" {% if choice.key in selected %}checked{% endif %}>
+          {% else %}
+          <input type="checkbox" name="choice" value="{{ choice.key }}" {% if choice.key in selected %}checked{% endif %}>
+          {% endif %}
+          <span class="key">{{ choice.key }}</span>
+          <span class="text">{{ choice.text }}</span>
+        </label>
+        {% endfor %}
+      </fieldset>
+
+      {% if checked %}
+      <div class="explain {% if checked.ok %}ok{% else %}ng{% endif %}">
+        <p><strong>{% if checked.ok %}正解{% else %}不正解{% endif %}</strong> · 正解は {{ checked.answer|join(", ") }}</p>
+        <p>{{ question.explanation }}</p>
+      </div>
+      {% endif %}
+
+      <div class="nav">
+        <button class="btn" type="submit" name="action" value="prev" {% if not prev_id %}disabled{% endif %}>前へ</button>
+        <label class="flag">
+          <input type="checkbox" name="flag" value="1" {% if flagged %}checked{% endif %}>
+          フラグ
+        </label>
+        {% if attempt.mode == "practice" %}
+        <button class="btn" type="submit" name="action" value="check">答え合わせ</button>
+        {% endif %}
+        {% if next_id %}
+        <button class="btn primary" type="submit" name="action" value="next">次へ</button>
+        {% else %}
+        <button class="btn primary" type="submit" name="action" value="finish">終了へ</button>
+        {% endif %}
+      </div>
+    </section>
+
+    <aside class="card palette-card">
+      <p class="palette-title">問題</p>
+      <div class="palette">
+        {% for item in quiz_set.questions %}
+        {% set answered = item.id in attempt.answers %}
+        {% set is_flag = item.id in attempt.flags %}
+        <button
+          type="submit"
+          name="goto"
+          value="{{ item.id }}"
+          class="dot {% if item.id == question.id %}current{% endif %} {% if answered %}answered{% endif %} {% if is_flag %}flagged{% endif %}"
+        >{{ item.no }}</button>
+        {% endfor %}
+      </div>
+      <p class="legend"><span class="swatch answered"></span>回答済 <span class="swatch flagged"></span>フラグ</p>
+      <button class="btn danger wide" type="submit" name="action" value="finish">試験を終了</button>
+    </aside>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/exam.js') }}"></script>
+{% endblock %}

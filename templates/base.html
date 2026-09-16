@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AZ-104 演習{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="{{ url_for('home') }}">AZ-104</a>
+    <span class="sub">パチスロ収支基盤セット</span>
+    <nav class="nav-links">
+      <a href="{{ url_for('home') }}">試験</a>
+      <a href="{{ url_for('logs') }}">正誤ログ</a>
+      <a href="{{ url_for('schedule') }}">予定</a>
+      <a href="{{ url_for('memos') }}">メモ</a>
+      <a href="{{ url_for('coach') }}">壁打ち</a>
+    </nav>
+    {% if exam_date %}
+    <span class="exam-chip">試験日 {{ exam_date }}{% if days_to_exam is not none %} · あと {{ days_to_exam }} 日{% endif %}</span>
+    {% endif %}
+  </header>
+  <main class="wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    {% endwith %}
+    {% block body %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

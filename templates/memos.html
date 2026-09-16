@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}メモ{% endblock %}
+{% block body %}
+<section class="card">
+  <p class="kicker">書き置き</p>
+  <h1>{% if edit %}メモを編集{% else %}新しいメモ{% endif %}</h1>
+  <form class="stack" method="post" action="{{ url_for('memo_save') }}">
+    {% if edit %}<input type="hidden" name="memo_id" value="{{ edit.id }}">{% endif %}
+    <label>
+      題名
+      <input type="text" name="title" value="{{ edit.title if edit else '' }}" placeholder="NSG と NIC の順序">
+    </label>
+    <label>
+      関連する問題（任意）
+      <select name="qid">
+        <option value="">なし</option>
+        {% for item in questions.values() %}
+        <option value="{{ item.id }}"
+          {% if edit and edit.qid == item.id %}selected{% endif %}
+          {% if not edit and request.args.get('qid') == item.id %}selected{% endif %}
+        >問 {{ item.no }} · {{ item.stem[:48] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      本文
+      <textarea name="body" rows="8" placeholder="自分の言葉で。壁打ちに渡します。">{{ edit.body if edit else '' }}</textarea>
+    </label>
+    <div class="nav">
+      <button class="btn primary" type="submit">保存</button>
+      {% if edit %}
+      <a class="btn" href="{{ url_for('memos') }}">新規に戻る</a>
+      {% endif %}
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <p class="kicker">一覧</p>
+  {% if memos %}
+  <ul class="memo-list">
+    {% for memo in memos %}
+    <li>
+      <a href="{{ url_for('memo_edit', memo_id=memo.id) }}"><strong>{{ memo.title }}</strong></a>
+      {% if memo.qid and questions.get(memo.qid) %}
+      <span class="pill">問 {{ questions[memo.qid].no }}</span>
+      {% endif %}
+      <p>{{ memo.body[:160] }}{% if memo.body|length > 160 %}…{% endif %}</p>
+      <form method="post" action="{{ url_for('memo_delete', memo_id=memo.id) }}" onsubmit="return confirm('消しますか？');">
+        <button class="btn danger" type="submit">削除</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>まだメモがありません。解説画面からも残せます。</p>
+  {% endif %}
+</section>
+{% endblock %}

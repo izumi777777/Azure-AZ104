@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}解説 問 {{ question.no }}{% endblock %}
+{% block body %}
+<div class="exam-grid">
+  <section class="card question">
+    <div class="meta">
+      <span>問 {{ question.no }} / {{ quiz_set.questions|length }}</span>
+      <span class="pill">{{ domain_labels[question.domain] }}</span>
+      <span class="pill {% if ok %}ok{% else %}ng{% endif %}">{% if ok %}正解{% else %}不正解{% endif %}</span>
+    </div>
+    {% if question.preamble %}
+    <p class="preamble">{{ question.preamble }}</p>
+    {% endif %}
+    <h2 class="stem">{{ question.stem }}</h2>
+    {% if question.code %}
+    <pre class="code"><code>{{ question.code }}</code></pre>
+    {% endif %}
+    <ul class="review-choices">
+      {% for choice in question.choices %}
+      <li class="choice
+        {% if choice.key in question.answer %}ok{% endif %}
+        {% if choice.key in selected and choice.key not in question.answer %}ng{% endif %}
+      ">
+        <span class="key">{{ choice.key }}</span>
+        <span class="text">{{ choice.text }}</span>
+        {% if choice.key in selected %}<em>選択</em>{% endif %}
+        {% if choice.key in question.answer %}<em>正解</em>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="explain {% if ok %}ok{% else %}ng{% endif %}">
+      <p>{{ question.explanation }}</p>
+    </div>
+    <p class="hint">
+      <a href="{{ url_for('coach', qid=question.id) }}">この問題を壁打ちする</a>
+    </p>
+    <form class="stack memo-inline" method="post" action="{{ url_for('memo_save') }}">
+      <input type="hidden" name="qid" value="{{ question.id }}">
+      <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+      <input type="hidden" name="next_qid" value="{{ question.id }}">
+      <label>
+        この問題のメモ
+        <input type="text" name="title" value="問 {{ question.no }} のメモ" required>
+      </label>
+      <label>
+        <textarea name="body" rows="3" placeholder="ひっかけ、自分の勘違い、次に見るポイント"></textarea>
+      </label>
+      <button class="btn" type="submit">メモを残す</button>
+    </form>
+    {% if q_memos %}
+    <ul class="plain">
+      {% for memo in q_memos %}
+      <li><a href="{{ url_for('memo_edit', memo_id=memo.id) }}">{{ memo.title }}</a> — {{ memo.body[:80] }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <div class="nav">
+      {% if prev_id %}
+      <a class="btn" href="{{ url_for('review', attempt_id=attempt.id, qid=prev_id) }}">前へ</a>
+      {% endif %}
+      <a class="btn" href="{{ url_for('result', attempt_id=attempt.id) }}">結果</a>
+      {% if next_id %}
+      <a class="btn primary" href="{{ url_for('review', attempt_id=attempt.id, qid=next_id) }}">次へ</a>
+      {% endif %}
+    </div>
+  </section>
+  <aside class="card palette-card">
+    <p class="palette-title">解説</p>
+    <div class="palette">
+      {% for item in quiz_set.questions %}
+      {% set row = detail_by_id[item.id] %}
+      <a
+        class="dot {% if item.id == question.id %}current{% endif %} {% if row.ok %}ok{% else %}ng{% endif %}"
+        href="{{ url_for('review', attempt_id=attempt.id, qid=item.id) }}"
+      >{{ item.no }}</a>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

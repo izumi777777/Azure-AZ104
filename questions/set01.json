@@ -1,0 +1,2022 @@
+{
+  "id": "set01",
+  "title": "パチスロ収支基盤セット1",
+  "exam": "AZ-104",
+  "status": "complete",
+  "planned_count": 60,
+  "time_limit_min": 100,
+  "pass_percent": 70,
+  "case_study": "リソースグループ rg-pachislot-prod（東日本）。VM vm-pachislot に Flask と SQLite 正本。データディスク disk-pachislot-data。ストレージ stpapachislot。VNet は snet-app / AzureBastionSubnet / snet-pe。パブリック IP を VM に付けない。23:00〜翌 4:00 は取得と Gemini で CPU が占有される。",
+  "questions": [
+    {
+      "id": "A01",
+      "no": 1,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "監査法人の同僚に、ポータルから VM のメトリックとバックアップの成功/失敗だけ見せたい。設定変更、ディスクのデタッチ、ストレージアカウントキーの閲覧はさせたくない。どの組みが適切か。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "サブスクリプションで Owner、リソースグループに削除ロック"
+        },
+        {
+          "key": "B",
+          "text": "rg-pachislot-prod で Reader"
+        },
+        {
+          "key": "C",
+          "text": "VM だけ Contributor、ストレージは何も付けない"
+        },
+        {
+          "key": "D",
+          "text": "サブスクリプションで User Access Administrator"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "閲覧だけなら Reader。Owner / Contributor はキー閲覧やディスク操作まで通る。User Access Administrator は権限の付与ができて広すぎる。",
+      "refs": [
+        "Manage access to Azure resources"
+      ]
+    },
+    {
+      "id": "D01",
+      "no": 2,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "いまの「22 番を世界に開けず IAP で入る」を Azure で最も近い形にする。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "VM にパブリック IP を付け、NSG で自分の自宅 IP だけ 22 を Allow"
+        },
+        {
+          "key": "B",
+          "text": "パブリック IP なし + Azure Bastion + Internet→22 Deny"
+        },
+        {
+          "key": "C",
+          "text": "5000 番を 0.0.0.0/0 で Allow し、SSH は閉じる"
+        },
+        {
+          "key": "D",
+          "text": "ExpressRoute を個人契約する"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "IAP SSH の翻訳は Bastion + パブリック IP なし。自宅 IP Allow は IP が変わるし、22 をインターネットに出す。",
+      "refs": [
+        "Implement Azure Bastion"
+      ]
+    },
+    {
+      "id": "B01",
+      "no": 3,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "Databricks 学習用に hall_daily_data の Parquet を同僚ワークスペースへ渡す。アカウントキーは渡したくない。後から一発で無効化したい。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "コンテナを公開（匿名読み取り）にする"
+        },
+        {
+          "key": "B",
+          "text": "アカウントキーを 1 通のメールで送り、終わったらローテーションする"
+        },
+        {
+          "key": "C",
+          "text": "格納アクセスポリシー付きの SAS を発行し、終わったらポリシーを消す"
+        },
+        {
+          "key": "D",
+          "text": "AzCopy のログインを同僚の個人 Microsoft アカウントに付ける"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": "格納アクセスポリシーを消せば、発行済み SAS をまとめて無効化できる。匿名公開はホール名ダンプには不適。アカウントキーは権限が広すぎる。",
+      "refs": [
+        "Create and use shared access signature (SAS) tokens"
+      ]
+    },
+    {
+      "id": "C01",
+      "no": 4,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "月曜 03:30 の ML 再学習で B1s がスワップだらけになる。Web の夜稼働画面は止めずに、学習だけ強くしたい。コストも 24 時間 D シリーズにはしたくない。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "VM を常時 D4s にする"
+        },
+        {
+          "key": "B",
+          "text": "Virtual Machine Scale Set を min=3 にする"
+        },
+        {
+          "key": "C",
+          "text": "学習ジョブだけ Container Apps か ACI で時限起動し、VM は Web + SQLite のまま"
+        },
+        {
+          "key": "D",
+          "text": "Availability Set に 2 台目を足して両方で学習する"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": "本 VM に同居させない。Scale Set 3 台は個人アプリではコスト事故。",
+      "refs": [
+        "Provision a container by using Azure Container Instances"
+      ]
+    },
+    {
+      "id": "E01",
+      "no": 5,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "23:00 のホール取得で CPU が 10 分だけ 90% になるのは正常。CPU 90% のメトリックアラートを 24 時間有効にすると毎晩通知が来る。ノイズを減らす良い手段はどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "アラートを削除する"
+        },
+        {
+          "key": "B",
+          "text": "アラート処理ルールで 22:50–00:10 を抑制し、取得失敗はログアラートで別検知する"
+        },
+        {
+          "key": "C",
+          "text": "VM をその時間だけ deallocate する"
+        },
+        {
+          "key": "D",
+          "text": "メトリックのサンプリングを 1 日に 1 回にする"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "予定されたスパイクは処理ルールで抑制。取得の成否は別シグナル。deallocate は本末転倒。",
+      "refs": [
+        "Set up alert rules, action groups, and alert processing rules"
+      ]
+    },
+    {
+      "id": "A02",
+      "no": 6,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "同僚は自社の Entra テナントを持っている。こちらのテナントに「メンバー」として作るとライセンスと監査上まずい。どう招待するか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "ローカルアカウントを VM に作り、Bastion で共有する"
+        },
+        {
+          "key": "B",
+          "text": "外部ユーザー（ゲスト）として招待し、必要なスコープだけ RBAC を付ける"
+        },
+        {
+          "key": "C",
+          "text": "ストレージアカウントキーをメールする"
+        },
+        {
+          "key": "D",
+          "text": "所有者アカウントのパスワードを 1 日だけ共有する"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "他テナントはゲスト招待。VM ローカル帳は監査不能。キーやパスワード共有は試験でも実務でも不可。",
+      "refs": [
+        "Manage external users"
+      ]
+    },
+    {
+      "id": "D02",
+      "no": 7,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "誤って VM にパブリック IP を付け、NSG に Inbound Allow * → 5000 優先度 110 を足した。Deny SSH は優先度 100 のまま。インターネットから Flask に届くか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "届かない。Deny が常に Allow に勝つ"
+        },
+        {
+          "key": "B",
+          "text": "届く。同じ方向では数値が小さい（優先度が高い）ルールが先。100 は 22 だけなので、110 の 5000 Allow が有効"
+        },
+        {
+          "key": "C",
+          "text": "届くが Bastion 経由だけ"
+        },
+        {
+          "key": "D",
+          "text": "既定の DenyAll が 65500 なので 5000 は常に閉じる"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "優先度は数値が小さいほど強い。Deny 22 は 5000 に影響しない。既定 DenyAll より明示 Allow が先。",
+      "refs": [
+        "Evaluate effective security rules in NSGs"
+      ]
+    },
+    {
+      "id": "B02",
+      "no": 8,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "ホール日次ダンプの使い方は次の通り。直近 7 日は夜稼働の検算でよく読む。30 日超はほぼ見ない。90 日超は学習用の凍結コピー。ライフサイクルで適切なのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "すべて Archive に即時移行し、読むときだけ再hydrate"
+        },
+        {
+          "key": "B",
+          "text": "7 日後 Cool、90 日後 Archive"
+        },
+        {
+          "key": "C",
+          "text": "すべて Premium SSD に置く"
+        },
+        {
+          "key": "D",
+          "text": "バージョン管理を無効化し、上書きだけにする"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "夜稼働の 7 日と、学習用の長期凍結はライフサイクルの定番。全部 Archive は hydrate 待ちで夜稼働に間に合わない。",
+      "refs": [
+        "Configure blob lifecycle management"
+      ]
+    },
+    {
+      "id": "C02",
+      "no": 9,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "「データセンター 1 棟の電源障害でも VM を残したい。更新ドメインの分散は不要。台数は 1 のまま」。どれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Availability Set"
+        },
+        {
+          "key": "B",
+          "text": "Availability Zone に 1 台置く"
+        },
+        {
+          "key": "C",
+          "text": "Scale Set の手動スケール 1"
+        },
+        {
+          "key": "D",
+          "text": "Azure Site Recovery だけ設定し、ゾーンは気にしない"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "1 台でデータセンター障害に備えるならゾーン。セットは複数 VM の更新／障害ドメイン用。",
+      "refs": [
+        "Deploy virtual machines to availability zones and availability sets"
+      ]
+    },
+    {
+      "id": "E02",
+      "no": 10,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "LINE にエラーを飛ばしたい。Azure Monitor の標準チャネルに LINE は無い。AZ-104 の範囲で組める形はどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "メトリックをポータルで見るだけ"
+        },
+        {
+          "key": "B",
+          "text": "アクション グループの Webhook（試験ではメール・SMS・Webhook）で外部 API に渡す"
+        },
+        {
+          "key": "C",
+          "text": "NSG フローログを LINE が直接購読する"
+        },
+        {
+          "key": "D",
+          "text": "Bastion のセッション記録を LINE に転送する"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "アクション グループが試験の答え。LINE 固有は出ないが Webhook が対応づけ。",
+      "refs": [
+        "Set up alert rules, action groups, and alert processing rules"
+      ]
+    },
+    {
+      "id": "A03",
+      "no": 11,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "ポータル掃除中に rg-pachislot-prod を消しかけた。正本 SQLite がディスクごと消える。再発防止で最初にやることはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "VM を Availability Set に入れ直す"
+        },
+        {
+          "key": "B",
+          "text": "リソースグループに CanNotDelete ロックを掛ける"
+        },
+        {
+          "key": "C",
+          "text": "ストレージを Archive 層にする"
+        },
+        {
+          "key": "D",
+          "text": "NSG で 22 番を Deny する"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "正本消滅は削除ロックの典型。可用性セットも NSG も消しミスは止めない。",
+      "refs": [
+        "Configure resource locks"
+      ]
+    },
+    {
+      "id": "D03",
+      "no": 12,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "ストレージをインターネットに出さず、VM からだけバックアップしたい。より厳格なのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "ストレージファイアウォールで「すべてのネットワーク」"
+        },
+        {
+          "key": "B",
+          "text": "サービスエンドポイントだけ"
+        },
+        {
+          "key": "C",
+          "text": "Private Endpoint を snet-pe に置き、パブリックアクセスを無効化"
+        },
+        {
+          "key": "D",
+          "text": "SAS の HTTPS 指定だけ"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": "PE + パブリック無効が一番きつい。サービスエンドポイントは Microsoft のバックボーン経由だがパブリック エンドポイントは残る。",
+      "refs": [
+        "Configure private endpoints for Azure PaaS"
+      ]
+    },
+    {
+      "id": "B03",
+      "no": 13,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "2026-09-01 に SQLite が malformed になり、復旧コピーを残した。Blob 上のバックアップを「消したつもりが消えていた」を防ぎたい。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "LRS を GRS にするだけで十分"
+        },
+        {
+          "key": "B",
+          "text": "Blob のソフトデリートとバージョン管理を有効化する"
+        },
+        {
+          "key": "C",
+          "text": "コンテナのアクセスレベルを Blob にする"
+        },
+        {
+          "key": "D",
+          "text": "ライフサイクルで 1 日後に削除する"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "malformed 復旧の再発防止は、消した・上書きしたを戻せるソフトデリートとバージョン。GRS はリージョン障害用。",
+      "refs": [
+        "Configure soft delete for blobs and containers"
+      ]
+    },
+    {
+      "id": "C03",
+      "no": 14,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "SQLite 正本がある VM を App Service（Linux、コードデプロイ）に移す提案。いちばんの問題はどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "App Service は Python を実行できない"
+        },
+        {
+          "key": "B",
+          "text": "ローカルディスクが揮発的で、正本 SQLite がデプロイやスケールで消える／共有できない"
+        },
+        {
+          "key": "C",
+          "text": "App Service は NSG を付けられないので必ず全世界公開になる"
+        },
+        {
+          "key": "D",
+          "text": "TLS 証明書が使えない"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "App Service はアプリ公開には強いが、この正本の置き方と対立する。TLS や Python は問題ではない。",
+      "refs": [
+        "Create and configure Azure App Service"
+      ]
+    },
+    {
+      "id": "E03",
+      "no": 15,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "malformed の翌日、「昨日 23:00 時点のディスク」に戻したい。リージョン横断のアプリフェールオーバーは不要。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Azure Site Recovery で西日本にフェールオーバー"
+        },
+        {
+          "key": "B",
+          "text": "Azure Backup の復旧ポイントからデータディスクを復元する"
+        },
+        {
+          "key": "C",
+          "text": "Blob の Archive を再hydrate するだけ（ディスクは触らない）"
+        },
+        {
+          "key": "D",
+          "text": "VM サイズを変えると自動でスナップショットに戻る"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "昨日のディスクは Backup。ASR は別リージョンへのフェールオーバー。",
+      "refs": [
+        "Perform backup and restore operations by using Azure Backup"
+      ]
+    },
+    {
+      "id": "A04",
+      "no": 16,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "いま B1s 相当で月額がほぼゼロに近い。サイズを D2s に上げると課金が乗る。コスト超過を「起きたあと」ではなく「近づいたとき」に知りたい。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Azure Advisor のセキュリティ推奨だけ有効化"
+        },
+        {
+          "key": "B",
+          "text": "予算（Budget）とコストアラートをサブスクリプションに設定する"
+        },
+        {
+          "key": "C",
+          "text": "VM の自動シャットダウンを 23:00 にする"
+        },
+        {
+          "key": "D",
+          "text": "リソースグループを別サブスクリプションに移す"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "Advisor は推奨。超過の閾値通知は Budget。23:00 停止は取得ジョブを殺す。",
+      "refs": [
+        "Manage costs by using alerts, budgets, and Azure Advisor"
+      ]
+    },
+    {
+      "id": "D04",
+      "no": 17,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "夜稼働が「データなし」。VM から取得元サイトへ出られない疑い。まず使うものはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Azure Advisor のコスト推奨"
+        },
+        {
+          "key": "B",
+          "text": "Network Watcher の接続モニター／IP フロー検証で、送信 NSG と実経路を見る"
+        },
+        {
+          "key": "C",
+          "text": "Site Recovery のフェールオーバー"
+        },
+        {
+          "key": "D",
+          "text": "Availability Set の障害ドメイン"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "データなしのインフラ側は送信経路。試験の Network Watcher シナリオそのもの。",
+      "refs": [
+        "Use Azure Network Watcher and Connection monitor"
+      ]
+    },
+    {
+      "id": "B04",
+      "no": 18,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "Flask が毎分 SQLite に書く。バックアップ先とは別に、アプリの正本を Azure Files の SMB 共有に移す提案が出た。AZ-104 的に正しい判断はどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Azure Files は WAL と同時書き込み向きなので移すべき"
+        },
+        {
+          "key": "B",
+          "text": "正本はデータディスクのまま。Files は設定ファイルや静的共有向き。SQLite のロックと遅延に向かない"
+        },
+        {
+          "key": "C",
+          "text": "Blob のホット層に pachislot.db を直接マウントする"
+        },
+        {
+          "key": "D",
+          "text": "ページ Blob に SQLite を置き、複数 VM から同時マウントする"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "WAL の SQLite を Files に置くとロックと遅延で壊れる。正本はデータディスク。Blob はバックアップと Parquet 用。",
+      "refs": [
+        "Create and configure a file share in Azure Files"
+      ]
+    },
+    {
+      "id": "C04",
+      "no": 19,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "Playwright による取得を本 VM で常駐させるとメモリが足りない。ポータルだけで「コンテナを短時間上げる」ならどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Azure Kubernetes Service を本番必須にする"
+        },
+        {
+          "key": "B",
+          "text": "Azure Container Instances または Container Apps"
+        },
+        {
+          "key": "C",
+          "text": "Cloud Shell を開きっぱなしにする"
+        },
+        {
+          "key": "D",
+          "text": "Bastion 上で Docker を動かす"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "ポータル範囲のコンテナは ACI / Container Apps。AKS は運用過大。Bastion は踏み台。",
+      "refs": [
+        "Provision and manage containers in the Azure portal"
+      ]
+    },
+    {
+      "id": "E04",
+      "no": 20,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "「東日本が 1 時間以上死んだら、西日本で VM ごと起したい。RPO は約 1 時間」。Backup の日次復元では足りない。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "予算アラート"
+        },
+        {
+          "key": "B",
+          "text": "Azure Site Recovery で Azure to Azure レプリケーション"
+        },
+        {
+          "key": "C",
+          "text": "Availability Set"
+        },
+        {
+          "key": "D",
+          "text": "Blob ソフトデリート"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "RPO 1 時間のリージョン障害は ASR。日次 Backup では 1 時間に届かない。",
+      "refs": [
+        "Configure Azure Site Recovery for Azure resources"
+      ]
+    },
+    {
+      "id": "A05",
+      "no": 21,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "「VM にパブリック IP を付けるデプロイを禁止したい」。最も直接的な手段はどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "NSG の既定ルールに頼る"
+        },
+        {
+          "key": "B",
+          "text": "Azure Policy でパブリック IP の作成を Deny"
+        },
+        {
+          "key": "C",
+          "text": "Bastion を 2 台にする"
+        },
+        {
+          "key": "D",
+          "text": "タグ PublicIP=false を付ける"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "タグは強制力がない。Policy の Deny が作成そのものを止める。",
+      "refs": [
+        "Implement and manage Azure Policy"
+      ]
+    },
+    {
+      "id": "D05",
+      "no": 22,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "Databricks 学習用ワークスペースが別 VNet vnet-dbx にある。vnet-pachislot の Private Endpoint 付き Blob を、ピアリング経由で読ませたい。最初に必要なのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "パブリック IP を VM に付ける"
+        },
+        {
+          "key": "B",
+          "text": "VNet ピアリング（必要なら Private Endpoint の DNS を両 VNet で解決できるようにする）"
+        },
+        {
+          "key": "C",
+          "text": "両方の VNet を削除して 1 つに作り直す"
+        },
+        {
+          "key": "D",
+          "text": "ロードバランサーをインターネット向きにする"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "ピアリングと Private DNS ゾーンのリンク。LB やパブリック IP は不要。",
+      "refs": [
+        "Create and configure virtual network peering"
+      ]
+    },
+    {
+      "id": "B05",
+      "no": 23,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "ストレージファイアウォールで「選択した仮想ネットワークからだけ」にした。VM から AzCopy でバックアップが失敗する。最初に疑うのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "NSG の受信 443 が Deny だから"
+        },
+        {
+          "key": "B",
+          "text": "サービスエンドポイントまたは Private Endpoint が VM サブネットに無い"
+        },
+        {
+          "key": "C",
+          "text": "Bastion が停止している"
+        },
+        {
+          "key": "D",
+          "text": "VM サイズが B1s だから"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "ファイアウォールを閉じたら、VNet 統合（サービスエンドポイントか PE）が無いと VM からも拒否される。Bastion は管理プレーン。",
+      "refs": [
+        "Configure Azure Storage firewalls and virtual networks"
+      ]
+    },
+    {
+      "id": "C05",
+      "no": 24,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "既存の ARM テンプレートを Bicep にしたい。公式の手順として正しいのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "ポータルの VM サイズ変更画面から自動変換される"
+        },
+        {
+          "key": "B",
+          "text": "ARM JSON を Bicep にデコンパイル（az bicep decompile 等）し、差分を見て直す"
+        },
+        {
+          "key": "C",
+          "text": "NSG をエクスポートすると Bicep になるので VM は手で書く"
+        },
+        {
+          "key": "D",
+          "text": "テンプレートの変換は AZ-305 の範囲で AZ-104 ではしない"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "AZ-104 は ARM/Bicep の解釈・修正・デコンパイルが範囲。",
+      "refs": [
+        "Export a deployment as an Azure Resource Manager template or convert to Bicep"
+      ]
+    },
+    {
+      "id": "E05",
+      "no": 25,
+      "domain": "monitor",
+      "select_count": 2,
+      "stem": "バックアップが 3 日連続で失敗していることに、ディスクが壊れてから気づいた。先に入れるべき監視はどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Recovery Services / Backup の失敗アラート"
+        },
+        {
+          "key": "B",
+          "text": "VM のハートビート欠落アラート"
+        },
+        {
+          "key": "C",
+          "text": "パブリック IP を付けてインターネットから死活確認する"
+        },
+        {
+          "key": "D",
+          "text": "ゲストの Entra ロールを Viewer にする"
+        },
+        {
+          "key": "E",
+          "text": "Advisor のパフォーマンス推奨だけを見る"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "バックアップ失敗と VM 死は別シグナル。パブリック IP は監視の代わりにならない。Advisor は推奨であり失敗の即時検知ではない。",
+      "refs": [
+        "Configure and interpret reports and alerts for backups"
+      ]
+    },
+    {
+      "id": "A06",
+      "no": 26,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "自分はサブスクリプション Reader、rg-pachislot-prod では Contributor。ストレージアカウントのアクセスキーをローテーションできるか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "できない。サブスクリプション Reader が常に勝つ"
+        },
+        {
+          "key": "B",
+          "text": "できる。リソースグループの Contributor が、その RG 内では勝つ"
+        },
+        {
+          "key": "C",
+          "text": "できるが Key Vault の権限が別途必須"
+        },
+        {
+          "key": "D",
+          "text": "できない。キー操作は Owner 専用"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "RBAC は狭いスコープの許可が、そのスコープでは有効。Contributor はアクセスキーのローテーションができる。「サブスク Reader が常に勝つ」は誤り。",
+      "refs": [
+        "Interpret access assignments"
+      ]
+    },
+    {
+      "id": "D06",
+      "no": 27,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "自分 1 人が HTTPS でアプリを使う。2 台の VM を負荷分散する必要はいま無い。試験で「内部負荷分散」が正解になるのはどの要件か。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "自宅ブラウザから直接 VIP にアクセスしたい"
+        },
+        {
+          "key": "B",
+          "text": "同一 VNet 内の別サブネット（例: 取得用コンテナ）からだけ Flask に振りたい。インターネットには出したくない"
+        },
+        {
+          "key": "C",
+          "text": "Cloudflare の代わりに必ず Public Load Balancer が要る"
+        },
+        {
+          "key": "D",
+          "text": "Bastion は内部 LB の背面に置く必要がある"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "内部 LB は VNet 内部用。自宅ブラウザ向けは Public LB / App Gateway。設問は内部 LB が正解になる要件を聞いている。",
+      "refs": [
+        "Configure an internal or public load balancer"
+      ]
+    },
+    {
+      "id": "B06",
+      "no": 28,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "アカウントキーが Git に混入した（app_settings 相当の事故）。最初にやる順として正しいのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "リポジトリを private にする → 何もしない"
+        },
+        {
+          "key": "B",
+          "text": "キーをローテーション → アプリの参照を Managed ID か SAS に切り替え → Git 履歴から除去"
+        },
+        {
+          "key": "C",
+          "text": "ソフトデリートを無効化する"
+        },
+        {
+          "key": "D",
+          "text": "ストレージを Archive にして読めなくする"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "漏れた鍵は無効化が先。private 化だけでは clone 済みキーは生きる。",
+      "refs": [
+        "Manage access keys"
+      ]
+    },
+    {
+      "id": "C06",
+      "no": 29,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "次の Bicep 断片の意図として正しいものはどれか。",
+      "code": "resource nsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {\n  name: 'nsg-pachislot'\n  location: location\n  properties: {\n    securityRules: [\n      {\n        name: 'Deny-SSH-Internet'\n        properties: {\n          priority: 100\n          direction: 'Inbound'\n          access: 'Deny'\n          protocol: 'Tcp'\n          sourceAddressPrefix: 'Internet'\n          destinationPortRange: '22'\n          sourcePortRange: '*'\n          destinationAddressPrefix: '*'\n        }\n      }\n    ]\n  }\n}",
+      "choices": [
+        {
+          "key": "A",
+          "text": "Bastion からの SSH もすべて拒否する"
+        },
+        {
+          "key": "B",
+          "text": "インターネットからの 22 番を拒否する。Bastion サブネットからの管理は別ルール／別経路で残せる"
+        },
+        {
+          "key": "C",
+          "text": "Flask の 5000 番を公開する"
+        },
+        {
+          "key": "D",
+          "text": "送信の 443 を拒否する"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "sourceAddressPrefix が Internet の Deny 22。Bastion は別サブネット・別経路。5000 も送信 443 も書いていない。",
+      "refs": [
+        "Interpret an Azure Resource Manager template or a Bicep file"
+      ]
+    },
+    {
+      "id": "E06",
+      "no": 30,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "KQL で「取得ジョブが Traceback を出した時間」を Log Analytics から探す。テーブル名のイメージとして適切なのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Syslog または VM の Heartbeat だけを見て Traceback が必ず入る"
+        },
+        {
+          "key": "B",
+          "text": "エージェントで収集した Syslog / Heartbeat に加え、カスタムテーブルか ContainerLog（ジョブをコンテナに出した場合）。TimeGenerated と文字列で絞り込む"
+        },
+        {
+          "key": "C",
+          "text": "NSG フローログに Python の例外全文が入る"
+        },
+        {
+          "key": "D",
+          "text": "Budget クエリ"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "例外本文はフローログには入らない。ログ収集を入れてから KQL。Heartbeat は生きているか用。",
+      "refs": [
+        "Query and analyze logs in Azure Monitor"
+      ]
+    },
+    {
+      "id": "B07",
+      "no": 31,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "東日本リージョンが半日落ちても、昨日の pachislot.db バックアップだけは別リージョンから読みたい。オブジェクトレプリケーションや冗長で適切なのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "LRS"
+        },
+        {
+          "key": "B",
+          "text": "ZRS（同一リージョン 3 ゾーン）"
+        },
+        {
+          "key": "C",
+          "text": "GRS または GZRS"
+        },
+        {
+          "key": "D",
+          "text": "Premium LRS"
+        }
+      ],
+      "answer": [
+        "C"
+      ],
+      "explanation": "別リージョンから読む = GRS/GZRS。ZRS は同一リージョンのゾーン。",
+      "refs": [
+        "Configure Azure Storage redundancy"
+      ]
+    },
+    {
+      "id": "C07",
+      "no": 32,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "データディスクが 30 GB のまま、venv とバックアップで逼迫してきた。VM を停止せず容量だけ増やしたい。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "OS ディスクを交換する"
+        },
+        {
+          "key": "B",
+          "text": "データディスクをポータル／CLI でリサイズし、OS 上でパーティションを伸ばす"
+        },
+        {
+          "key": "C",
+          "text": "Blob に SQLite をコピーしてディスクを消す"
+        },
+        {
+          "key": "D",
+          "text": "Scale Set に入れないとディスクは伸ばせない"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "マネージドディスクのリサイズは定番操作。OS 上のファイルシステム拡張を忘れない。",
+      "refs": [
+        "Manage virtual machine disks"
+      ]
+    },
+    {
+      "id": "A07",
+      "no": 33,
+      "domain": "identity",
+      "select_count": 2,
+      "stem": "自分のアカウントがロックされた。SSPR はまだ有効にしていない。管理者が取るべき対応はどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Entra 管理者がパスワードをリセットして入れるようにする"
+        },
+        {
+          "key": "B",
+          "text": "再発防止として SSPR を有効化する"
+        },
+        {
+          "key": "C",
+          "text": "所有者アカウントのパスワードを LINE で共有する"
+        },
+        {
+          "key": "D",
+          "text": "NSG で 22 番を Internet に Allow する"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "今すぐ入るには管理者によるリセット。次からは SSPR。パスワード共有も 22 番公開も試験でも実務でも不可。",
+      "refs": [
+        "Configure self-service password reset (SSPR)"
+      ]
+    },
+    {
+      "id": "D07",
+      "no": 34,
+      "domain": "network",
+      "select_count": 2,
+      "stem": "実効セキュリティ規則を見ると、Flask の 5000 がまだ Allow になっている。Deny SSH（優先度 100）はある。理由としてあり得るのはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "5000 の明示 Allow が、既定の DenyAll より優先度が高い（数値が小さい）"
+        },
+        {
+          "key": "B",
+          "text": "Application Security Group の関連付けで、その NIC に 5000 Allow が当たっている"
+        },
+        {
+          "key": "C",
+          "text": "Deny SSH は 22 番だけなので 5000 も閉じる"
+        },
+        {
+          "key": "D",
+          "text": "Bastion は常に 5000 をインターネットへ公開する"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "同じ方向では数値の小さいルールが勝つ。Deny 22 は 5000 に及ばない。ASG 経由の Allow も実効規則に出る。",
+      "refs": [
+        "Evaluate effective security rules in NSGs"
+      ]
+    },
+    {
+      "id": "B08",
+      "no": 35,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "hall_daily_data の Parquet を大量に Databricks 学習用へコピーしたい。一方、コンテナにファイルが 3 つあるかだけポータルで確認したい。使い分けはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "大量コピーは AzCopy、少数の確認は Storage Explorer かポータル"
+        },
+        {
+          "key": "B",
+          "text": "常に Storage Explorer の GUI が最速なので AzCopy は使わない"
+        },
+        {
+          "key": "C",
+          "text": "AzCopy は Linux 専用で macOS の学習マシンでは使えない"
+        },
+        {
+          "key": "D",
+          "text": "どちらもアカウントキーが無いと SAS でも動かない"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "一括は AzCopy、目視確認は Explorer。AzCopy は Windows/macOS/Linux がある。認証はキー以外に SAS や ID もある。",
+      "refs": [
+        "Manage data by using Azure Storage Explorer and AzCopy"
+      ]
+    },
+    {
+      "id": "C08",
+      "no": 36,
+      "domain": "compute",
+      "select_count": 2,
+      "stem": "vm-pachislot を rg-pachislot-prod から rg-pachislot-dr へ移したい。正しい説明はどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "VM と紐づく NIC・ディスクなど、依存リソースの移動可否を先に確認する"
+        },
+        {
+          "key": "B",
+          "text": "別リージョンへ移す操作は、リソースグループ移動ではなく再作成や Site Recovery の話になる"
+        },
+        {
+          "key": "C",
+          "text": "Bastion を削除しないと、同じリージョンの RG 間でも移せない"
+        },
+        {
+          "key": "D",
+          "text": "移動すると SQLite が自動で GRS の Blob になる"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "同一リージョンの RG 移動は依存関係付き。リージョン越えは Move ではない。Bastion 削除は必須ではない。ディスク上の DB はストレージ冗長に変わらない。",
+      "refs": [
+        "Move a virtual machine to another resource group, subscription, or region"
+      ]
+    },
+    {
+      "id": "A08",
+      "no": 37,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "課金分析のため、全リソースにタグ app=pachislot と env=prod を付けたい。手動を忘れたくない。強制する手段はどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "思い出したときにポータルで付ける"
+        },
+        {
+          "key": "B",
+          "text": "Azure Policy で必須タグ（Deny または追加）を割り当てる"
+        },
+        {
+          "key": "C",
+          "text": "NSG ルール名を tag-prod にする"
+        },
+        {
+          "key": "D",
+          "text": "Blob のライフサイクルにタグを書く"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "タグの強制は Policy。手動は忘れる。NSG 名もライフサイクルもタグガバナンスではない。",
+      "refs": [
+        "Apply and manage tags on resources",
+        "Implement and manage Azure Policy"
+      ]
+    },
+    {
+      "id": "D08",
+      "no": 38,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "取得用サブネットに UDR を足し、0.0.0.0/0 の次ホップを None（破棄）にしてしまった。23:00 のホール取得が全滅する。原因はどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "取得元サイトへの送信 443 が捨てられる。UDR を Internet か Firewall に戻す"
+        },
+        {
+          "key": "B",
+          "text": "受信 NSG の Deny 22 が原因"
+        },
+        {
+          "key": "C",
+          "text": "Blob のソフトデリートが取得 HTTP を止める"
+        },
+        {
+          "key": "D",
+          "text": "自分の Reader ロールが原因で VM が名前解決できない"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "UDR の Discard は送信を落とす。夜稼働データなしのインフラ原因になり得る。SSH Deny やソフトデリートとは別。",
+      "refs": [
+        "Configure user-defined routes",
+        "Troubleshoot network connectivity"
+      ]
+    },
+    {
+      "id": "B09",
+      "no": 39,
+      "domain": "storage",
+      "select_count": 2,
+      "stem": "90 日超のホール日次ダンプは Archive にある。今夜の夜稼働前にその日の島データを読みたい。必要なことはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "対象 Blob を Hot または Cool へ再hydrate する"
+        },
+        {
+          "key": "B",
+          "text": "再hydrate の完了を待ってから読む。Archive のままでは間に合わない"
+        },
+        {
+          "key": "C",
+          "text": "Archive のまま AzCopy すれば即読める"
+        },
+        {
+          "key": "D",
+          "text": "VM を D シリーズに上げれば Archive をメモリに展開できる"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "Archive は再hydrate が要る。夜稼働の直前に触るデータは Archive に置かない、がこのアプリの実務でも同じ。",
+      "refs": [
+        "Configure storage tiers"
+      ]
+    },
+    {
+      "id": "C09",
+      "no": 40,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "データディスク上の records（個人収支）を、ホストのキャッシュからも守りたい。AZ-104 の範囲で足すのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "VM の encryption at host を有効化する"
+        },
+        {
+          "key": "B",
+          "text": "NSG で受信 443 を閉じる"
+        },
+        {
+          "key": "C",
+          "text": "サブスクリプションを Reader だけにする"
+        },
+        {
+          "key": "D",
+          "text": "バックアップコンテナを Cool にする"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "Encryption at host がホストキャッシュを含むディスク暗号化の話。NSG や RBAC、Cool 層とは別レイヤ。",
+      "refs": [
+        "Configure encryption at host for Azure virtual machines"
+      ]
+    },
+    {
+      "id": "A09",
+      "no": 41,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "rg-pachislot-prod に CanNotDelete ロックがある。vm-pachislot を rg-pachislot-dr へ移そうとしたら失敗した。最初に疑うのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "ロックを外すか、移動をブロックしないスコープにする。移動できないリソース種別も確認する"
+        },
+        {
+          "key": "B",
+          "text": "ロックは移動を妨げない。Availability Set 不足が原因"
+        },
+        {
+          "key": "C",
+          "text": "Archive 層の Blob が VM 移動を止める"
+        },
+        {
+          "key": "D",
+          "text": "Bastion が 2 台無いと RG 移動はできない"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "削除ロックは移動・削除系の操作を止めることがある。種別によってはそもそも Move 非対応。セットや Bastion 台数の話ではない。",
+      "refs": [
+        "Configure resource locks",
+        "Manage resource groups"
+      ]
+    },
+    {
+      "id": "D09",
+      "no": 42,
+      "domain": "network",
+      "select_count": 2,
+      "stem": "vnet-dbx の Databricks から、vnet-pachislot 側 Private Endpoint の Blob を名前で引きたい。ピアリングは済んでいる。まだ NXDOMAIN になる。必要なことはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "privatelink.blob.core.windows.net の Private DNS ゾーンを用意する"
+        },
+        {
+          "key": "B",
+          "text": "ピアリング先の vnet-dbx にもそのゾーンをリンクする"
+        },
+        {
+          "key": "C",
+          "text": "vm-pachislot にパブリック IP を付ける"
+        },
+        {
+          "key": "D",
+          "text": "ストレージを GRS にする"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "PE の名前解決は Private DNS。ピアリングだけではゾーンリンクは増えない。パブリック IP も GRS も DNS の代わりにならない。",
+      "refs": [
+        "Configure Azure DNS",
+        "Configure private endpoints for Azure PaaS"
+      ]
+    },
+    {
+      "id": "B10",
+      "no": 43,
+      "domain": "storage",
+      "select_count": 2,
+      "stem": "設定ファイルだけを SMB で共有し、認証はアカウントキーではなく ID にしたい。正本 SQLite の置き場は変えたくない。正しい組みはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "設定ファイル共有に Azure Files と ID ベースアクセスを使う"
+        },
+        {
+          "key": "B",
+          "text": "pachislot.db はデータディスクのままにする"
+        },
+        {
+          "key": "C",
+          "text": "WAL 付き SQLite を Azure Files に置いて複数プロセスで開く"
+        },
+        {
+          "key": "D",
+          "text": "ストレージアカウントキーを Flask に直書きする"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "Files + ID は設定共有向き。このアプリの SQLite はロックと遅延で Files に向かない。キー直書きは B06 の事故の再現。",
+      "refs": [
+        "Configure identity-based access for Azure Files"
+      ]
+    },
+    {
+      "id": "C10",
+      "no": 44,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "Web 用 VM と取得用 VM の 2 台にした。計画メンテナンス時に同時に落ちないよう、更新ドメインを分けたい。ゾーン分散は必須ではない。どれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "同一リージョンの Availability Set に 2 台を入れる"
+        },
+        {
+          "key": "B",
+          "text": "1 台だけ Availability Zone に置けば更新ドメインも分かれる"
+        },
+        {
+          "key": "C",
+          "text": "Virtual Machine Scale Set を min=10 にする"
+        },
+        {
+          "key": "D",
+          "text": "両方を同じ障害ドメインに固定する"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "更新ドメインはセットの話。ゾーンはデータセンター障害用で、1 台では更新ドメイン分散にならない。10 台は過剰。",
+      "refs": [
+        "Deploy virtual machines to availability zones and availability sets"
+      ]
+    },
+    {
+      "id": "A10",
+      "no": 45,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "自分はサブスクリプション Reader。ストレージアカウント stpapachislot だけ Owner。実効権限として正しいのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "そのストレージのアクセスキーは回せるが、VM を削除する権限までは持たない"
+        },
+        {
+          "key": "B",
+          "text": "サブスク Reader が常に勝つのでキーも回せない"
+        },
+        {
+          "key": "C",
+          "text": "ストレージ Owner なのでサブスクリプション全体の Owner と同じ"
+        },
+        {
+          "key": "D",
+          "text": "VM のディスクをデタッチできる"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "狭いスコープの Owner はそのリソースに効く。サブスク Reader がキー操作を打ち消すわけではない。VM には及ばない。",
+      "refs": [
+        "Interpret access assignments",
+        "Assign roles at different scopes"
+      ]
+    },
+    {
+      "id": "D10",
+      "no": 46,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "Bastion と Standard SKU のロードバランサーを使う予定がある。パブリック IP の SKU で適切なのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Standard パブリック IP。Basic は制限が多く、Bastion や Standard LB と組み合わせない"
+        },
+        {
+          "key": "B",
+          "text": "Basic の方がゾーン冗長なので Bastion には Basic を付ける"
+        },
+        {
+          "key": "C",
+          "text": "Bastion を使うなら VM 自身にパブリック IP が必須"
+        },
+        {
+          "key": "D",
+          "text": "Standard パブリック IP は HTTP 専用で HTTPS の取得には使えない"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "Bastion / Standard LB は Standard IP。VM にパブリック IP を付ける必要はない（この演習の前提でも付けない）。",
+      "refs": [
+        "Configure public IP addresses",
+        "Implement Azure Bastion"
+      ]
+    },
+    {
+      "id": "B11",
+      "no": 47,
+      "domain": "storage",
+      "select_count": 1,
+      "stem": "stpapachislot の暗号化。個人の学習用バックアップで、鍵を自分の HSM で回す規制はまだ無い。どれが適切か。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "既定の Microsoft マネージドキーで足りる。鍵の管理主体が監査要件になるときだけカスタマーマネージドキー"
+        },
+        {
+          "key": "B",
+          "text": "CMK が無いと Blob は平文で置かれる"
+        },
+        {
+          "key": "C",
+          "text": "MMK は無効化できないので必ず CMK にする"
+        },
+        {
+          "key": "D",
+          "text": "暗号化は NSG の TLS 検査で行う"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "ストレージは既定で暗号化済み（MMK）。CMK はコンプライアンス要件。NSG はネットワーク。",
+      "refs": [
+        "Configure storage account encryption"
+      ]
+    },
+    {
+      "id": "C11",
+      "no": 48,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "Flask だけ App Service に出し、正本 SQLite は今の VM ディスクに残す提案。判断として正しいのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "あり得る。App Service のローカルディスクに pachislot.db を置かないことが条件"
+        },
+        {
+          "key": "B",
+          "text": "App Service に db ファイルを置けばスケールアウトしても自動共有される"
+        },
+        {
+          "key": "C",
+          "text": "App Service は Python を実行できないので分割できない"
+        },
+        {
+          "key": "D",
+          "text": "分割すると Bastion が使えなくなり SSH を世界公開するしかない"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "コードと正本を分けるのは試験でも実務でも筋が通る。揮発ディスクに SQLite を置くのが失敗パターン。Python も Bastion も分割の禁止理由ではない。",
+      "refs": [
+        "Create and configure Azure App Service"
+      ]
+    },
+    {
+      "id": "A11",
+      "no": 49,
+      "domain": "identity",
+      "select_count": 2,
+      "stem": "rg-pachislot-prod の Contributor では、同僚に Reader を付けられなかった。ロールを他人に割り当てられるのはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Owner"
+        },
+        {
+          "key": "B",
+          "text": "User Access Administrator"
+        },
+        {
+          "key": "C",
+          "text": "Reader"
+        },
+        {
+          "key": "D",
+          "text": "Backup Reader"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "Contributor はリソース操作はできるが RBAC 付与はできない。付与は Owner か User Access Administrator。",
+      "refs": [
+        "Manage built-in Azure roles"
+      ]
+    },
+    {
+      "id": "D11",
+      "no": 50,
+      "domain": "network",
+      "select_count": 1,
+      "stem": "Connection Monitor で vm-pachislot → 取得元サイトの HTTPS が失敗する。受信 NSG で 5000 は Deny のまま。最初に見るのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "送信 NSG と名前解決（DNS）。受信 5000 は取得の出に関係ない"
+        },
+        {
+          "key": "B",
+          "text": "受信 22 の Deny を Allow に変える"
+        },
+        {
+          "key": "C",
+          "text": "Availability Set の障害ドメイン"
+        },
+        {
+          "key": "D",
+          "text": "バックアップコンテナの Archive 設定"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "取得は VM から外へ出る通信。受信 5000 や SSH、セット、Archive は別問題。",
+      "refs": [
+        "Use Azure Network Watcher and Connection monitor"
+      ]
+    },
+    {
+      "id": "C12",
+      "no": 51,
+      "domain": "compute",
+      "select_count": 2,
+      "stem": "App Service で Flask を公開するとき、AZ-104 でよくセットになる設定はどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "カスタム DNS 名に TLS 証明書をバインドする"
+        },
+        {
+          "key": "B",
+          "text": "デプロイスロットはコード入れ替え用。本番スロットに pachislot.db を置かない"
+        },
+        {
+          "key": "C",
+          "text": "スロットを使うと NSG が不要になり 22 番が自動で開く"
+        },
+        {
+          "key": "D",
+          "text": "カスタムドメインは Standard パブリック LB 専用で App Service には使えない"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "カスタムドメイン + TLS とスロットは App Service の定番。スロットは SSH 公開ではない。App Service 自体がカスタムドメインを持つ。",
+      "refs": [
+        "Configure certificates and TLS for an App Service",
+        "Configure deployment slots for an App Service"
+      ]
+    },
+    {
+      "id": "A12",
+      "no": 52,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "いまサブスクリプションは個人の従量課金が 1 つ。管理グループは今すぐ要るか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "今は不要。複数サブスクや環境（dev/prod）を分けてからでよい"
+        },
+        {
+          "key": "B",
+          "text": "1 台の VM でも管理グループが無いと Policy は効かない"
+        },
+        {
+          "key": "C",
+          "text": "Bastion の前提条件である"
+        },
+        {
+          "key": "D",
+          "text": "SQLite のバックアップ先として必須である"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "管理グループは大規模ガバナンス用。Policy はサブスクや RG にも付けられる。Bastion や DB の前提ではない。",
+      "refs": [
+        "Configure management groups"
+      ]
+    },
+    {
+      "id": "C13",
+      "no": 53,
+      "domain": "compute",
+      "select_count": 2,
+      "stem": "取得用 Playwright イメージをレジストリに置き、ポータルから短時間だけコンテナを上げたい。手順として正しいものはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Azure Container Registry にイメージを置く"
+        },
+        {
+          "key": "B",
+          "text": "ACI または Container Apps が ACR から pull するよう認証を設定する"
+        },
+        {
+          "key": "C",
+          "text": "毎回 Bastion 上で docker build しないと ACI は動かない"
+        },
+        {
+          "key": "D",
+          "text": "ACR は匿名 pull が試験の推奨である"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "ACR → ACI/Container Apps がポータル範囲の定番。Bastion で毎回ビルドは不要。匿名公開は推奨しない。",
+      "refs": [
+        "Create and manage an Azure Container Registry",
+        "Provision a container by using Azure Container Instances"
+      ]
+    },
+    {
+      "id": "A13",
+      "no": 54,
+      "domain": "identity",
+      "select_count": 1,
+      "stem": "「VM にパブリック IP を付けるデプロイを禁止したい」。Policy の効果 Audit と Deny の違いはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Audit は作れて警告だけ残る。作成そのものを止めるなら Deny"
+        },
+        {
+          "key": "B",
+          "text": "Audit は作成をブロックし、Deny はログだけ"
+        },
+        {
+          "key": "C",
+          "text": "どちらもタグを付けるだけで、作成は止められない"
+        },
+        {
+          "key": "D",
+          "text": "Deny はサブスクリプション Owner には効かない"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "禁止したい操作は Deny。Audit はコンプライアンス確認用。Owner でも Deny は効く（例外は別途除外）。",
+      "refs": [
+        "Implement and manage Azure Policy"
+      ]
+    },
+    {
+      "id": "C14",
+      "no": 55,
+      "domain": "compute",
+      "select_count": 1,
+      "stem": "いまの VM をポータルからテンプレートに落とし、SKU だけ B1s から B2s に変えて同じ構成を出したい。手順として正しいのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "デプロイを ARM としてエクスポートし、Bicep にデコンパイルして SKU を直して再デプロイする"
+        },
+        {
+          "key": "B",
+          "text": "VM サイズ変更画面が Bicep ファイルを自動生成するので、それを保存するだけ"
+        },
+        {
+          "key": "C",
+          "text": "AZ-104 ではテンプレートを触らず、ポータル操作だけが範囲である"
+        },
+        {
+          "key": "D",
+          "text": "NSG の JSON をストレージアカウントに貼れば VM SKU が変わる"
+        }
+      ],
+      "answer": [
+        "A"
+      ],
+      "explanation": "エクスポートとデコンパイル、パラメータ修正は AZ-104 の範囲。サイズ変更 UI は既存 VM の操作で、テンプレート生成ではない。",
+      "refs": [
+        "Export a deployment as an ARM template or convert to Bicep"
+      ]
+    },
+    {
+      "id": "A14",
+      "no": 56,
+      "domain": "identity",
+      "select_count": 2,
+      "stem": "監査法人の同僚をゲスト招待した。ライセンスと RBAC の関係として正しいものはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "ポータルで Reader としてメトリックを見る、は RBAC 割り当てで足りることが多い"
+        },
+        {
+          "key": "B",
+          "text": "条件付きアクセスなど Entra の有料機能は、テナント側のライセンスが別途要ることがある"
+        },
+        {
+          "key": "C",
+          "text": "ゲストは Premium ライセンスが無いとログイン自体できない"
+        },
+        {
+          "key": "D",
+          "text": "ゲストは自動で VM のローカル管理者になる"
+        }
+      ],
+      "answer": [
+        "A",
+        "B"
+      ],
+      "explanation": "ゲスト招待 + RBAC が基本。全機能が無償とは限らないが、ログイン不能になるわけでもない。ローカル管理者は別設定。",
+      "refs": [
+        "Manage external users",
+        "Manage licenses in Microsoft Entra ID"
+      ]
+    },
+    {
+      "id": "S01",
+      "no": 57,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "最初に切り分ける順番として最も妥当なのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "すぐ西日本へ Site Recovery"
+        },
+        {
+          "key": "B",
+          "text": "VM が動いているか（メトリック / Heartbeat）→ 送信が NSG で落ちていないか（Network Watcher）→ ストレージへバックアップが書けているか"
+        },
+        {
+          "key": "C",
+          "text": "NSG で 5000 を全面 Allow"
+        },
+        {
+          "key": "D",
+          "text": "ディスクを 4 TB に拡張"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "死活 → 経路 → データの順。いきなり ASR しない。",
+      "refs": [
+        "Interpret metrics in Azure Monitor"
+      ],
+      "preamble": "夜稼働画面が「データなし」。最大回転が当日 1834G で 4000G 未達、という話とは別に、そもそも 23:00 取得が VM まで届いていない疑いがある。"
+    },
+    {
+      "id": "S02",
+      "no": 58,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "Heartbeat は来ている。IP フロー検証で Internet 向け 443 が NSG Deny。原因としてあり得るのはどれか。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "Bastion が 443 を占有している"
+        },
+        {
+          "key": "B",
+          "text": "送信ルールで Internet を Deny したか、Application Security Group の関連付けを間違えた"
+        },
+        {
+          "key": "C",
+          "text": "Blob のソフトデリート"
+        },
+        {
+          "key": "D",
+          "text": "Reader ロールしかない"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "送信 Deny。Bastion は inbound 管理。",
+      "refs": [
+        "Troubleshoot network connectivity"
+      ]
+    },
+    {
+      "id": "S03",
+      "no": 59,
+      "domain": "monitor",
+      "select_count": 1,
+      "stem": "取得は復旧した。昨日の不完全な hall_daily_data を、バックアップの「取得前」に戻したい。アプリの Flask は動いたまま、データディスクだけ戻す。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "VM 全体を別リージョンにフェールオーバー"
+        },
+        {
+          "key": "B",
+          "text": "Backup からディスクを復元し、既存 VM にスワップ／再アタッチする手順を取る（本番前にロックとスナップショットを確認）"
+        },
+        {
+          "key": "C",
+          "text": "Parquet の SAS を再発行する"
+        },
+        {
+          "key": "D",
+          "text": "Container Apps のレプリカを 10 にする"
+        }
+      ],
+      "answer": [
+        "B"
+      ],
+      "explanation": "データディスクだけ戻すのが Backup の使い方。Flask を西日本に飛ばす話ではない。",
+      "refs": [
+        "Perform backup and restore operations by using Azure Backup"
+      ]
+    },
+    {
+      "id": "S04",
+      "no": 60,
+      "domain": "monitor",
+      "select_count": 2,
+      "stem": "再発時にスマホへ通知したい。CPU アラートは 23:00 で鳴るので使いたくない。必要なものはどれか。該当するものを2つ選べ。",
+      "code": null,
+      "choices": [
+        {
+          "key": "A",
+          "text": "CPU > 10% を 1 分間隔のメトリックアラート"
+        },
+        {
+          "key": "B",
+          "text": "カスタムログに「取得失敗」が出たときのログアラート"
+        },
+        {
+          "key": "C",
+          "text": "アクション グループ（メール / SMS / Webhook）"
+        },
+        {
+          "key": "D",
+          "text": "ディスク IOPS の情報アラートだけ"
+        },
+        {
+          "key": "E",
+          "text": "Policy の監査効果のみ"
+        }
+      ],
+      "answer": [
+        "B",
+        "C"
+      ],
+      "explanation": "業務失敗はログで取り、通知はアクション グループ。CPU は 23:00 の正常負荷と区別できない。",
+      "refs": [
+        "Set up alert rules, action groups, and alert processing rules"
+      ]
+    }
+  ]
+}

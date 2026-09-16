@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}AZ-104 セット1{% endblock %}
+{% block body %}
+<section class="card">
+  <p class="kicker">{{ quiz_set.exam }} · ローカル試験</p>
+  <h1>{{ quiz_set.title }}</h1>
+  <p class="lede">
+    収録 {{ quiz_set.questions|length }} / {{ quiz_set.planned_count }} 問。
+    {% if quiz_set.status != "complete" %}残りは後から足す。{% endif %}
+    制限 {{ quiz_set.time_limit_min }} 分、合格目安 {{ quiz_set.pass_percent }}%。
+  </p>
+  <div class="case">{{ quiz_set.case_study }}</div>
+  <form class="start" method="post" action="{{ url_for('exam_start') }}">
+    <label class="mode">
+      <input type="radio" name="mode" value="exam" checked>
+      試験（提出まで正解を出さない）
+    </label>
+    <label class="mode">
+      <input type="radio" name="mode" value="practice">
+      練習（1問ごとに答え合わせ）
+    </label>
+    <button type="submit" class="btn primary">開始</button>
+  </form>
+  <p class="hint">http://127.0.0.1:5104 のみ。GCP の正本 DB には接続しません。</p>
+</section>
+
+<div class="dash">
+  <section class="card">
+    <p class="kicker">今日の予定</p>
+    {% if today_plan %}
+    <h2>{{ today_plan.title }}</h2>
+    <p>{{ domain_labels[today_plan.domain] }} · 目標 {{ today_plan.target_questions }} 問</p>
+    <p class="lede">{{ today_plan.note }}</p>
+    <p>{% if today_plan.done %}済{% else %}未完了{% endif %} · <a href="{{ url_for('schedule') }}">予定を見る</a></p>
+    {% elif exam_date %}
+    <p>試験日は入っていますが、予定がまだありません。<a href="{{ url_for('schedule') }}">予定を作る</a></p>
+    {% else %}
+    <p>試験日を入れると、日ごとの領域ローテが出ます。<a href="{{ url_for('schedule') }}">試験日を設定</a></p>
+    {% endif %}
+  </section>
+  <section class="card">
+    <p class="kicker">領域の正答率</p>
+    {% if domain_stats %}
+    <div class="domains">
+      {% for domain, bucket in domain_stats.items() %}
+      <div class="domain-row">
+        <span>{{ domain_labels[domain] }}</span>
+        <div class="bar"><i style="width: {{ bucket.percent }}%"></i></div>
+        <span>{{ bucket.percent }}%</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p><a href="{{ url_for('logs') }}">正誤ログ</a></p>
+    {% else %}
+    <p>まだログがありません。練習の答え合わせか、試験の提出で溜まります。</p>
+    {% endif %}
+  </section>
+</div>
+
+{% if attempts %}
+<section class="card">
+  <p class="kicker">最近の受験</p>
+  <ul class="plain">
+    {% for item in attempts %}
+    <li>
+      <a href="{{ url_for('result', attempt_id=item.id) }}">
+        {{ item.finished_at[:16].replace('T', ' ') }} · {{ item.mode }} ·
+        {{ item.result.percent if item.result else '-' }}%
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if memos %}
+<section class="card">
+  <p class="kicker">最近のメモ</p>
+  <ul class="plain">
+    {% for memo in memos %}
+    <li><a href="{{ url_for('memo_edit', memo_id=memo.id) }}">{{ memo.title }}</a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

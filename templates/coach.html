@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}壁打ち{% endblock %}
+{% block body %}
+<section class="card">
+  <p class="kicker">復習の相手</p>
+  <h1>壁打ち AI</h1>
+  <p class="lede">
+    Gemini に、このセットの世界線（vm-pachislot、Bastion、23:00 取得）で聞きます。
+    公式問題の再現はさせません。キーは環境変数 <code>GEMINI_API_KEY</code> か、下の欄（ローカル SQLite）です。
+  </p>
+  <form class="stack" method="post">
+    <input type="hidden" name="action" value="save_key">
+    <label>
+      Gemini API キー{% if key_mask %}（いま {{ key_mask }}）{% endif %}
+      <input type="password" name="api_key" placeholder="AIza..." autocomplete="off">
+    </label>
+    <button class="btn" type="submit">キーを保存</button>
+  </form>
+</section>
+
+<section class="card">
+  <form class="stack" method="get">
+    <label>
+      この問題について聞く
+      <select name="qid" onchange="this.form.submit()">
+        <option value="">特定の問題なし（概念だけ）</option>
+        {% for item in questions %}
+        <option value="{{ item.id }}" {% if qid == item.id %}selected{% endif %}>
+          問 {{ item.no }} · {{ item.stem[:56] }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+  {% if question %}
+  <p class="preamble">問 {{ question.no }} · {{ domain_labels[question.domain] }}<br>{{ question.stem }}</p>
+  {% endif %}
+  {% if recent_wrongs and not qid %}
+  <p class="hint">最近間違えた問題:
+    {% for row in recent_wrongs %}
+    <a href="{{ url_for('coach', qid=row.qid) }}">{{ row.qid }}</a>{% if not loop.last %} · {% endif %}
+    {% endfor %}
+  </p>
+  {% endif %}
+</section>
+
+<section class="card chat-card">
+  <div class="chat">
+    {% for msg in messages %}
+    <div class="bubble {{ msg.role }}">
+      <p class="who">{% if msg.role == 'user' %}あなた{% else %}相手{% endif %}</p>
+      <pre>{{ msg.content }}</pre>
+    </div>
+    {% else %}
+    <p class="lede">わからない語、なぜ他の選択肢がダメか、自分のメモの穴を書いてください。</p>
+    {% endfor %}
+  </div>
+  <form class="stack" method="post">
+    <input type="hidden" name="action" value="ask">
+    {% if qid %}<input type="hidden" name="qid" value="{{ qid }}">{% endif %}
+    <label>
+      質問
+      <textarea name="message" rows="4" {% if not has_key %}placeholder="先に API キーを入れてください"{% else %}placeholder="例: NSG を NIC に付けるのとサブネットに付けるのは、パチスロ VM だとどう違う？"{% endif %}></textarea>
+    </label>
+    <div class="nav">
+      <button class="btn primary" type="submit" {% if not has_key %}disabled{% endif %}>送る</button>
+      <button class="btn" type="submit" name="action" value="clear">このスレッドを消す</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

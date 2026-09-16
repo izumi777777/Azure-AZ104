@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}学習予定{% endblock %}
+{% block body %}
+<section class="card">
+  <p class="kicker">試験日まで</p>
+  <h1>学習スケジュール</h1>
+  <form class="stack" method="post">
+    <label>
+      試験日
+      <input type="date" name="exam_date" value="{{ exam_date }}" required>
+    </label>
+    <div class="nav">
+      <button class="btn" type="submit" name="action" value="save_date">試験日だけ保存</button>
+      <button class="btn primary" type="submit" name="action" value="generate">予定を作り直す</button>
+    </div>
+  </form>
+  <p class="hint">
+    5領域を日替わりで回し、直近3日は弱点・通し試験・直前メモにします。
+    {% if weak_domain %}いまの弱点は {{ domain_labels[weak_domain] }}。{% endif %}
+    作り直すとチェックは消えます。
+  </p>
+</section>
+
+{% if days %}
+<section class="card">
+  <p class="kicker">進捗 {{ done }} / {{ total }} 日</p>
+  <table class="grid">
+    <thead>
+      <tr><th></th><th>日付</th><th>内容</th><th>目標</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for row in days %}
+      <tr class="{% if row.date == today %}today{% endif %} {% if row.done %}done{% endif %}">
+        <td>
+          <form method="post">
+            <input type="hidden" name="action" value="toggle">
+            <input type="hidden" name="date" value="{{ row.date }}">
+            <button class="btn" type="submit">{% if row.done %}済{% else %}未{% endif %}</button>
+          </form>
+        </td>
+        <td>{{ row.date }}{% if row.date == today %} · 今日{% endif %}</td>
+        <td>
+          <strong>{{ row.title }}</strong><br>
+          <span class="lede">{{ domain_labels[row.domain] }} · {{ row.note }}</span>
+        </td>
+        <td>{{ row.target_questions }} 問</td>
+        <td><a href="{{ url_for('home') }}">解く</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}
